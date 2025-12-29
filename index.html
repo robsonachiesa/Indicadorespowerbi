@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />  
+<title>PowerBI Vault</title>
+<style>
+  html, body {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, sans-serif;
+  }
+
+  #matrixCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #082B4F;
+    z-index: -1;
+  }
+
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #loginBox {
+    width: 350px;                
+    background: rgba(255,255,255,0.95);
+    padding: 20px 15px;          
+    border-radius: 10px;         
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25); 
+    box-sizing: border-box;
+    text-align: center;
+  }
+
+  #loginBox img {
+    width: 200px;
+    height: 200px;
+    margin-bottom: 10px;
+  }
+
+  #loginBox h3 {
+    margin: 5px 0 15px 0;
+    font-size: 18px;
+    font-weight: 500;
+    color: #082B4F;
+  }
+
+  #loginBox h2 {
+    margin-bottom: 15px;         
+    font-size: 22px;             
+    font-weight: 600;
+    color: #082B4F;
+  }
+
+  #loginBox input {
+    width: 90%;                  
+    padding: 10px 12px;          
+    font-size: 15px;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    outline: none;
+    transition: border 0.2s;
+  }
+
+  #loginBox input:focus {
+    border-color: #0078D4;       
+  }
+
+  #loginBox button {
+    width: 30%;
+    padding: 10px 0;
+    margin: 15px auto 0 auto;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 6px;
+    background: #0078D4;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  #loginBox button:hover {
+    background: #005fa3;
+  }
+
+  #forgot {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #005fa3;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  .password-container {
+    position: relative;
+    width: 100%;        
+    margin: 10px auto 0 auto;
+  }
+
+  .password-container input {
+    width: 100%;        
+    padding: 10px 35px 10px 12px;
+    font-size: 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+  }
+
+  .togglePassword {
+    position: absolute;
+    top: 50%;
+    right:20px; 
+    transform: translateY(-40%);
+    cursor: pointer;
+    font-size: 18px;
+    color: #555;
+    user-select: none;
+  }
+
+  #linksBox {
+    position: relative; 
+    width: 600px;
+    background: rgba(0, 50, 100, 0.95); 
+    padding: 100px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.3);
+    max-height: 500px;
+    overflow-y: auto;
+    display: none;
+  }
+
+  #linksBox h2 {
+    text-align: center;
+    position: relative;
+    top: -40px; 
+    color: #ddd9ce; 
+  }
+
+  input, button {
+    width: 94%;
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    box-sizing: border-box;
+  }
+
+  button {
+    cursor: pointer;
+    background: #0078D4;
+    color: white;
+    border: none;
+    font-weight: bold;
+  }
+
+  button:hover {
+    background: #005fa3;
+  }
+
+  #linksBox button {
+    width: 200px;
+    display: block;
+    margin: 10px auto 0 auto;
+    padding: 6px 12px;
+  }
+
+  .item {
+    background: #e8f0fe;
+    padding: 15px;
+    margin-top: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.1s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  }
+
+  .deleteBtn {
+    background: #ff4c4c;
+    border: none;
+    color: white;
+    padding: 4px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 80px !important;
+    min-width: 60px !important;
+    text-align: center;
+    line-height: 1;
+    font-size: 14px;
+  }
+
+  .deleteBtn:hover {
+    background: #e04343;
+  }
+
+  .abrirBtn {
+    background: #0078D4;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+  }
+
+  #logoutBtn {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    background: #d9534f;
+  }
+
+  #logoutBtn:hover {
+    background: #c9302c;
+  }
+
+  #newTitulo, #newLink {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 80% !important; 
+  }
+
+  #viewerFull {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: white;
+    z-index: 9999;
+    display: none;
+  }
+
+  #viewerFull iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  #closeViewer {
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10000px;
+  padding: 17px 0px;
+  background: #ffffff;      /* fundo branco */
+  border: none;
+  color: #000000;           /* texto preto */
+  font-size: 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  z-index: 10000;
+}
+
+#closeViewer:hover {
+  background: #ffffff;
+}
+
+  #fullscreenBtn {
+    position: fixed;
+    top: -5px; 
+    right: 8px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.4);
+    color: white;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    z-index: 10001;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background 0.2s;
+  }
+
+  #fullscreenBtn:hover {
+    background: rgba(0,0,0,0.6);
+  }
+
+</style>
+</head>
+<body>
+
+<canvas id="matrixCanvas"></canvas>
+
+<div id="loginBox">
+  <img src="https://img.icons8.com/ios_filled/200/228BE6/power-bi-2021.png" 
+       alt="Logo Power BI" 
+       style="margin-left: 0; width: 120px; height: 120px; margin-bottom: 15px;"> 
+  <h3 style="text-align: center; margin: -10px 0 30px 0; font-size: 20px; font-weight: 600; color: #082B4F;">
+    Dashboards Power BI
+  </h3>
+  <h2>Login</h2>
+  <input id="user" placeholder="Usuário">
+
+  <div class="password-container">
+    <input id="pass" type="password" placeholder="Senha" style="padding: 6px 35px 6px 12px; font-size: 14px;"> 
+    <span class="togglePassword" onclick="togglePassword()">👁️</span>
+  </div>
+
+  <button onclick="login()">Entrar</button>
+  <div id="forgot" onclick="forgotPassword()">Esqueci a senha</div>
+</div>
+
+<div id="linksBox">
+  <h2>Bem-vindo!</h2>
+
+  <div id="listaLinks"></div>
+  <button id="logoutBtn" onclick="logoutLinks()">Sair</button>
+</div>
+
+<div id="viewerFull">
+  <iframe id="viewerFrame"></iframe>
+  <button id="closeViewer" onclick="fecharViewer()">Fechar</button>
+</div>
+
+<button id="fullscreenBtn" onclick="toggleFullscreen()">⛶</button>
+
+<script>
+const usuarios = [
+  { usuario: "visitante", senha: "1234" }
+
+];
+
+let links = [
+  {
+    titulo: "Relatório Comercial",
+    link: "https://app.powerbi.com/view?r=eyJrIjoiMmE3MTk4ZmUtYmYyOS00NmRmLTg0MzgtYWU1OTY2NzU4YTI1IiwidCI6ImIwZGU5NTg3LTZiN2ItNDRjZi04ZmU4LTdlZThhNTdhMTBiZCJ9&pageName=ReportSection060c32e741a386344e70"
+  },
+  {
+    titulo: "DRE",
+    link: "https://app.powerbi.com/view?r=eyJrIjoiYjAwNjZhOTAtMDFmYy00OGZmLTk2MTItNGE2MzIxMDMyMmQ0IiwidCI6ImIwZGU5NTg3LTZiN2ItNDRjZi04ZmU4LTdlZThhNTdhMTBiZCJ9"
+  },
+  {
+    titulo: "Relatório de Vendas",
+    link: "https://app.powerbi.com/view?r=eyJrIjoiMjkyY2RiYmItZGE3Ny00M2Y0LTkyNzEtMTZhODI3OTBhMGZjIiwidCI6ImIwZGU5NTg3LTZiN2ItNDRjZi04ZmU4LTdlZThhNTdhMTBiZCJ9&pageName=ReportSection6068ca10875e1336b612"
+  },
+    {
+    titulo: "Recursos Humanos",
+    link: "https://app.powerbi.com/view?r=eyJrIjoiNDAzZWMwNTItZDZkZi00ODc3LTg2OWItMGJjMGIzNDlkMGIzIiwidCI6ImIwZGU5NTg3LTZiN2ItNDRjZi04ZmU4LTdlZThhNTdhMTBiZCJ9&pageName=ReportSectionaf6c3be8d7b5c2576043"
+  }
+];
+
+let usuarioLogado = "";
+
+function login() {
+  const userInput = document.getElementById("user").value.trim();
+  const passInput = document.getElementById("pass").value;
+
+  const usuarioEncontrado = usuarios.find(u => u.usuario === userInput && u.senha === passInput);
+
+  if (usuarioEncontrado) {
+    usuarioLogado = usuarioEncontrado.usuario;
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("linksBox").style.display = "block";
+    mostrarLinks();
+  } else {
+    alert("Usuário ou senha incorretos.");
+  }
+}
+
+function logoutLinks() {
+  document.getElementById("linksBox").style.display = "none";
+  document.getElementById("loginBox").style.display = "block";
+  document.getElementById("user").value = "";
+  document.getElementById("pass").value = "";
+}
+
+function togglePassword() {
+  const pass = document.getElementById("pass");
+  pass.type = pass.type === "password" ? "text" : "password";
+}
+
+function forgotPassword() {
+  alert("Contate o administrador (Adriano) para redefinir sua senha.");
+}
+
+function mostrarLinks() {
+  let area = document.getElementById("listaLinks");
+  area.innerHTML = "";
+
+  links.forEach((l, index) => {
+    const div = document.createElement("div");
+    div.className = "item";
+
+    const containerTitulo = document.createElement("div");
+    containerTitulo.style.display = "flex";
+    containerTitulo.style.alignItems = "center";
+
+    const logo = document.createElement("img");
+    logo.src = "https://pragmaticworks.com/hs-fs/hubfs/Microsoft-Power-BI-Symbol.png?width=500&height=500&name=Microsoft-Power-BI-Symbol.png";
+    logo.alt = "Power BI";
+    logo.style.width = "25px";
+    logo.style.height = "25px";
+    logo.style.marginRight = "10px";
+
+    const titulo = document.createElement("strong");
+    titulo.textContent = l.titulo;
+
+    containerTitulo.appendChild(logo);
+    containerTitulo.appendChild(titulo);
+    div.appendChild(containerTitulo);
+
+    if (usuarioLogado === "adriano") {
+      const abrirContainer = document.createElement("div");
+      abrirContainer.style.flexGrow = "1";
+      abrirContainer.style.display = "flex";
+      abrirContainer.style.justifyContent = "center";
+      abrirContainer.style.alignItems = "center";
+
+      const abrirBtn = document.createElement("a");
+      abrirBtn.href = "javascript:void(0)";
+      abrirBtn.textContent = "Abrir Relatório";
+      abrirBtn.className = "abrirBtn";
+      abrirBtn.onclick = () => abrirViewer(l.link);
+      abrirContainer.appendChild(abrirBtn);
+      div.appendChild(abrirContainer);
+
+      const delBtn = document.createElement("button");
+      delBtn.textContent = "Excluir";
+      delBtn.className = "deleteBtn";
+      delBtn.onclick = () => {
+        links.splice(index, 1);
+        mostrarLinks();
+      };
+      div.appendChild(delBtn);
+    } else {
+      const abrirBtn = document.createElement("a");
+      abrirBtn.href = "javascript:void(0)";
+      abrirBtn.textContent = "Abrir Relatório";
+      abrirBtn.className = "abrirBtn";
+      abrirBtn.style.marginLeft = "auto";
+      abrirBtn.onclick = () => abrirViewer(l.link);
+      div.appendChild(abrirBtn);
+    }
+
+    area.appendChild(div);
+  });
+
+  const displayAdd = (usuarioLogado === "maria" || usuarioLogado === "wesley" || usuarioLogado === "nicole" || usuarioLogado === "gustavo") ? "none" : "block";
+
+  document.querySelector("#newTitulo").style.display = displayAdd;
+  document.querySelector("#newLink").style.display = displayAdd;
+  document.querySelector("#linksBox button[onclick='addLink()']").style.display = displayAdd;
+}
+
+function addLink() {
+  const titulo = document.getElementById("newTitulo").value.trim();
+  const link = document.getElementById("newLink").value.trim();
+
+  if (!titulo || !link) {
+    alert("Preencha título e link!");
+    return;
+  }
+
+  links.push({ titulo, link });
+
+  document.getElementById("newTitulo").value = "";
+  document.getElementById("newLink").value = "";
+
+  mostrarLinks();
+}
+
+function abrirViewer(url) {
+  const v = document.getElementById("viewerFull");
+  const f = document.getElementById("viewerFrame");
+
+  f.src = url;
+  v.style.display = "block";
+}
+
+function fecharViewer() {
+  const v = document.getElementById("viewerFull");
+  const f = document.getElementById("viewerFrame");
+
+  f.src = "";
+  v.style.display = "none";
+}
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen();
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    }
+  }
+}
+
+/* MATRIX EFFECT */
+const canvasMatrix = document.getElementById("matrixCanvas");
+const ctx = canvasMatrix.getContext("2d");
+
+canvasMatrix.width = window.innerWidth;
+canvasMatrix.height = window.innerHeight;
+
+const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*";
+const fontSize = 16;
+const columns = Math.floor(canvasMatrix.width / fontSize);
+const drops = Array(columns).fill(1);
+
+function drawMatrix() {
+  ctx.fillStyle = "rgba(8, 43, 79, 0.15)";
+  ctx.fillRect(0, 0, canvasMatrix.width, canvasMatrix.height);
+
+  ctx.fillStyle = "#00b4ff"; // azul Power BI (pode mudar)
+  ctx.font = fontSize + "px monospace";
+
+  for (let i = 0; i < drops.length; i++) {
+    const text = letters.charAt(Math.floor(Math.random() * letters.length));
+    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+    if (drops[i] * fontSize > canvasMatrix.height && Math.random() > 0.975) {
+      drops[i] = 0;
+    }
+
+    drops[i]++;
+  }
+}
+
+setInterval(drawMatrix, 40);
+
+window.addEventListener("resize", () => {
+  canvasMatrix.width = window.innerWidth;
+  canvasMatrix.height = window.innerHeight;
+});
+
+
+window.addEventListener('resize', resizeParticles);
+resizeParticles();
+drawParticles();
+</script>
+
+</body>
+</html>
+
+
